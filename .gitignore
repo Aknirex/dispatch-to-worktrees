@@ -1,0 +1,9 @@
+# Local agent tool state (worktrees, sessions, markers)
+.kilo/
+
+# Editor and OS files
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+Desktop.ini

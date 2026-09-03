@@ -1,0 +1,7 @@
+interface:
+  display_name: "Dispatch to Worktree"
+  short_description: "Review-gated ticket pipeline over git worktree sessions"
+  default_prompt: "Use $dispatch-to-worktree to run the ticket-to-merge dispatcher pipeline for these ready tickets: <ticket list or tracker path>."
+
+policy:
+  allow_implicit_invocation: true
