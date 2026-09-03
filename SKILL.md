@@ -29,6 +29,15 @@ Put this rule in every dispatch prompt. Ask the session to confirm it before sta
 
 A session that ends without a close-out did not finish. Treat it as lost. Keep its worktree state for the next session.
 
+## Before you start: session check
+
+Act as dispatcher only when this session can really do it. Before anything else:
+
+1. Run `agent_manager` action=list.
+2. If the tool is missing, the call fails, or this is not a kilocode Agent Manager session: stop. Tell the user the dispatcher must run as a resident session inside kilocode Agent Manager, then end.
+
+No dispatch, no worktree creation, until the check passes.
+
 ## Steps
 
 1. Dispatch a ticket

@@ -30,9 +30,13 @@ npx skills add Aknirex/dispatch-to-worktree -y
 - Merges no-ff into `main`, writes a merge record, and cleans up finished worktrees and branches
 - Enforces test layering (affected subset on fix rounds, full suite once at the gate) and log-mode process supervision with no blind sleep polling
 
-## Boundaries
+## Dependencies and Boundaries
 
-This is a process skill for kilocode Agent Manager + git worktrees. It does not implement tickets itself, does not rewrite a repo's existing workflow, and expects the target repository to carry its own conventions (`AGENTS.md`, ticket source, model registry, test commands). It is designed for concurrent worktree pipelines; a single isolated coding task does not need it. Project-specifics in this skill are defaults and are always overridden by the repo's recorded conventions.
+- **Session + worktree capability is required.** The host agent must (1) manage git worktrees and (2) spawn and supervise **independent agent sessions** — not just inline subagents. The whole protocol (dispatch, close-out, stop, re-dispatch) only makes sense for sessions with their own context and lifecycle.
+- **Developed primarily for kilocode Agent Manager.** The skill assumes an `agent_manager`-style session tool and a resident AM dispatcher session. If the runtime lacks that capability, the skill stops and tells the user to run it inside Agent Manager.
+- **Default ticket source: matt-pocock/skills output.** By default it recognizes tickets split by the [matt-pocock/skills](https://github.com/mattpocock/skills) workflow (`to-tickets`/`triage`): markdown tickets under `.scratch/<feature>/issues/` with a `Status: ready-for-agent` triage line and an acceptance checklist. The repo's own `AGENTS.md` overrides this default.
+- **A process skill, not an implementer.** It does not split tickets (do that first with `to-tickets`/`triage`) and it does not rewrite a repo's conventions — ticket source, model registry, and test commands all come from the target repo's `AGENTS.md`.
+- **Not for a single isolated task.** It exists to run concurrent ticket pipelines; a lone coding task does not need it.
 
 ## Good Input To Give The Agent
 
