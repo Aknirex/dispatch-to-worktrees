@@ -1,5 +1,5 @@
 ---
-name: dispatch-to-worktree
+name: dispatch-to-worktrees
 description: "Run work across git worktree sessions from one resident dispatcher session in kilocode Agent Manager (调度员把票据分派到 worktree 会话并监管到合并). Use when asked to dispatch/分派/派发 tickets or tasks into worktree sessions and supervise them to merge, gate a finished branch behind read-only review, or clean up completed worktree sessions."
 ---
 

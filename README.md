@@ -11,13 +11,13 @@ The process is distilled from a production workflow used on a UE5 multiplayer re
 Install the folder into the host's skills directory, e.g.:
 
 ```bash
-cp -r dispatch-to-worktree ~/.agents/skills/
+cp -r dispatch-to-worktrees ~/.agents/skills/
 ```
 
 or, once the project is hosted on GitHub:
 
 ```bash
-npx skills add Aknirex/dispatch-to-worktree -y
+npx skills add Aknirex/dispatch-to-worktrees -y
 ```
 
 ## What It Does
@@ -41,7 +41,7 @@ npx skills add Aknirex/dispatch-to-worktree -y
 ## Good Input To Give The Agent
 
 ```text
-Use dispatch-to-worktree. The playtest follow-up phase has these ready tickets:
+Use dispatch-to-worktrees. The playtest follow-up phase has these ready tickets:
 <list or path to the tracker>. Dispatch the unblocked ones, supervise to merge,
 and clean up finished worktree sessions.
 ```
