@@ -1,70 +1,67 @@
 # Session protocol
 
-The close-out contract every dispatched session obeys. The dispatcher pastes the relevant clauses into each dispatch prompt (templates in `dispatch-prompts.md`), so the contract travels with the session. Paths and defaults below are overridden by repo conventions.
+The close-out contract for dispatched sessions. The dispatcher puts the relevant parts into each dispatch prompt. Repo rules override the defaults here.
 
-## The close-out
+## Close-out
 
-A dispatched session's last action is its close-out: it tells the dispatcher the stage finished, and only then ends. Ordering is the point — the message precedes the end, never the reverse. A session that ends without a close-out has not finished, even if its work is committed.
+Order matters: message first, end second. A session that ends without a close-out did not finish.
 
-Close-out has two parts:
+Two parts:
 
-1. A `SESSION_DONE.md` marker written in the session's own worktree (below).
-2. One `agent_manager` prompt to the dispatcher session (below).
+1. Write `SESSION_DONE.md` in its worktree.
+2. Send one `agent_manager` prompt to the dispatcher.
 
-## 1. The marker file: `SESSION_DONE.md`
+### 1. The marker: `SESSION_DONE.md`
 
-Path:
+Path: `.kilo/worktrees/<worktree-name>/SESSION_DONE.md`
 
-```
-.kilo/worktrees/<worktree-name>/SESSION_DONE.md
-```
-
-First line is exactly one of:
+First line, exactly one of:
 
 ```
-PASS - <one-line summary of what was achieved>
-FAIL - blockers: <short comma-separated blocker list>
+PASS - <one-line summary>
+FAIL - blockers: <list>
 ```
 
-Below the first line goes the evidence section the role requires (see Evidence). The marker path is local tool state, not a tracked source file, so writing it never counts as a source change. A session that cannot finish its stage still writes `FAIL -` with blockers and preserves its state (committed work, WIP notes).
+Add evidence below the first line. The marker is local tool state, not a tracked file. Writing it is not a code change. A session that cannot finish still writes `FAIL -` with blockers, then keeps its state.
 
-## 2. The message to the dispatcher
+### 2. The message
 
-Immediately after writing the marker, the session sends the dispatcher one `agent_manager` prompt containing:
+After the marker, send one prompt with:
 
-- session id and worktree name,
-- branch tip hash,
-- what it ran and the results (suite names, passed/total, run mode),
-- verdict (`PASS`/`FAIL`) and, for a review, the findings summary.
+- session id, worktree name
+- branch tip hash
+- tests run: suites, passed/total, mode
+- verdict: PASS or FAIL
+- review: findings summary
 
-The dispatcher advances the pipeline on receipt of this message. Nothing polls.
+The dispatcher moves the pipeline when this message arrives. Nothing polls.
 
-## Evidence expectations
+## Evidence needed
 
-| Stage | Minimum evidence in marker + message |
+| Stage | Minimum evidence |
 |---|---|
-| Worker `PASS` | Branch tip hash; build result; suites run with counts and run mode; anything left undone |
-| Worker `FAIL` | Same plus the blocker list |
-| Reviewer `PASS` | Every acceptance line judged; build/test evidence the reviewer itself ran |
-| Reviewer `FAIL` | Every blocker mapped to the acceptance line it hits; non-blocking notes listed separately |
+| Worker PASS | tip hash, build result, test counts, what is left undone |
+| Worker FAIL | same, plus blockers |
+| Reviewer PASS | every acceptance line judged, plus evidence you ran |
+| Reviewer FAIL | every blocker mapped to an acceptance line; notes separate |
 
-## Reviewer read-only discipline
+## Reviewer rules
 
-- May: read anything; run builds and tests (their untracked, gitignored artifacts are fine); write the single `SESSION_DONE.md` in its own snapshot worktree.
-- Must not: modify any tracked file, commit, push, edit tickets, or write any other file anywhere.
-- A reviewer that writes anywhere else voids its own review: the dispatcher resets the snapshot to the branch tip and re-dispatches. Findings live in the marker and the close-out message — nothing else needs to be written.
+- Can: read files, run builds and tests, write its own `SESSION_DONE.md`.
+- Cannot: change files, commit, push, edit tickets, write any other file.
+- Writing anywhere else voids the review. The dispatcher resets the snapshot and reviews again.
 
-## Worker discipline
+## Worker rules
 
-- May: work freely inside its own worktree and branch, commit on the ticket branch.
-- Must not: touch main, merge anything, delete its worktree, modify other worktrees, or write outside its worktree except the marker and the close-out message.
-- Never stage or commit the repo's secret files.
+- Can: work in its worktree, commit on the ticket branch.
+- Cannot: touch main, merge, delete its worktree, change other worktrees, write outside its worktree (except the marker and the close-out message).
+- Never commit secret files.
 
-## Model registry
+## Models
 
-New sessions are started with an explicit model + variant from the repo's registry (the repo's `AGENTS.md` usually records which model codes, which reviews, and which variant each uses). Never start a dispatched session on an unregistered default. A session keeps its model for its whole life; a successor inherits the same registered role model.
+Start new sessions with the model + variant from the repo registry. Do not guess. A session keeps its model. A successor uses the same role model.
 
 ## Fix rounds
 
-- A fix round returns the blocker list to the same coding session when it is still within budget; otherwise the dispatcher resets a successor worktree to the branch tip and the successor continues the same ticket branch.
-- After the fix is committed, the dispatcher resets the review snapshot to the new tip and re-dispatches the review. Rounds are counted by review dispatches, not by fixes.
+- Send blockers to the same session if it can still work. Else reset a new worktree to the branch tip and continue the same branch.
+- After the fix, reset the review snapshot to the new tip and review again. Count review rounds, not fix rounds.

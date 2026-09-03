@@ -1,34 +1,34 @@
 # Dispatch prompts
 
-Fill-in templates for spawning sessions via `agent_manager`. Replace every `<angle-bracket>` field from the repo's conventions at dispatch time: ticket paths, test commands, registry models/variants, marker paths, secret-file names. Delete lines that do not apply to the repo.
+Templates for spawning sessions with `agent_manager`. Fill in every `<angle-bracket>` field from the repo rules. Send the prompt whole, not summarized.
 
-Send the prompt whole, never summarized, so the contract travels with the session.
-
-## Worker (coding) session
+## Worker session
 
 ```
 Role: implement ticket <nn> <title> in this worktree.
 
-Ticket (source of truth): <ticket path>
-Acceptance checklist (source of truth for "done"): <path or paste list>
-Repo conventions: <repo AGENTS.md and pointed-to docs>
-Runtime policy: <repo runtime policy pointer>
+Ticket (source of truth): <path>
+Acceptance checklist: <path or list>
+Repo rules: <repo AGENTS.md>
+Runtime policy: <repo pointer>
 
-Worktree: <path>  Branch: <ticket-<nn>-<slug>> (based on main @ <sha>)
-Scope for this round: <what this round must and must not touch>
+Worktree: <path>
+Branch: <ticket-<nn>-<slug>> (base: main @ <sha>)
+Scope: <what this round touches>
 
 Do:
-- Implement the acceptance items. Commit on this branch only, messages following repo style.
-- Run only the affected subset for this round: <test command / filter>.
+- Implement the acceptance items. Commit on this branch only.
+- Run only the affected tests for this round: <command or filter>.
 - Do not touch main. Do not merge. Do not delete this worktree.
-- Never stage or commit: <repo secret file names>.
+- Never commit: <secret file names>.
 
-Close-out (read this now and confirm you will follow it):
-- When the work is done, or blocked: FIRST write .kilo/worktrees/<wt>/SESSION_DONE.md
-  (first line "PASS - <summary>" or "FAIL - blockers: <list>", then evidence:
-  tip hash, suites + counts + run mode).
-- THEN send the dispatcher (session <ses_dispatcher_id>) one message with the same content.
-- Only after the message is sent, end. Sending the message is part of the work.
+Close-out:
+- When done, or blocked:
+  1. Write .kilo/worktrees/<wt>/SESSION_DONE.md.
+     First line: "PASS - <summary>" or "FAIL - blockers: <list>".
+     Below: tip hash, tests + counts + mode.
+  2. Send the dispatcher (session <ses_dispatcher_id>) one message with the same info.
+  3. Only then end. The message is part of the work.
 
 Model: <registry model + variant>
 ```
@@ -38,43 +38,39 @@ Model: <registry model + variant>
 ```
 Role: read-only review of ticket <nn> <title>.
 
-Snapshot: <path> @ branch tip <sha>
-Change under review: <ticket branch> vs base main @ <sha>
-Ticket (source of truth): <ticket path>
-Acceptance checklist: <path or paste list> — judge only against this, plus the repo's
-recorded coding standards where they exist. Every finding maps to an acceptance line.
+Snapshot: <path> @ <sha>
+Change: <ticket branch> vs main @ <sha>
+Ticket: <path>
+Acceptance checklist: <path or list> — judge only against this.
 
 Do:
-- Read the change. Run whatever build/test evidence you need in this snapshot, waiting on
-  log output (kill + report any process silent for <timeout>; do not poll with sleeps).
-- Verdict PASS: show each acceptance line judged, with the evidence you ran.
-- Verdict FAIL: list blockers, each tied to the acceptance line it hits; put anything else
-  (judgment, optional) in a separate non-blocking notes list.
+- Read the change. Run builds/tests you need, in this snapshot.
+- Wait on log output. No logs for <timeout>: kill and report. No sleep polling.
+- PASS: show each acceptance line judged, with evidence.
+- FAIL: list blockers, each tied to an acceptance line. Notes separate.
 
-Read-only discipline:
-- Write exactly one file: .kilo/worktrees/<wt>/SESSION_DONE.md. No commits, no pushes,
-  no ticket edits. Writing anywhere else voids this review; findings live in the marker
-  and your close-out message.
+Read-only:
+- Write exactly one file: .kilo/worktrees/<wt>/SESSION_DONE.md.
+- No commits, no pushes, no ticket edits. Any other write voids this review.
 
-Close-out (read this now and confirm you will follow it):
-- When the review is finished: FIRST write the SESSION_DONE.md marker
-  (first line "PASS - ..." or "FAIL - blockers: ...", then evidence: verdict, acceptance
-  lines judged, suites + counts + run mode you ran).
-- THEN send the dispatcher (session <ses_dispatcher_id>) one message: verdict, tip hash,
-  blocker list with acceptance mappings.
-- Only after the message is sent, end.
+Close-out:
+- When done:
+  1. Write the SESSION_DONE.md marker (first line PASS/FAIL, then evidence).
+  2. Send the dispatcher (session <ses_dispatcher_id>) one message:
+     verdict, tip hash, blockers with acceptance lines.
+  3. Only then end.
 
 Model: <registry review model + variant>
 ```
 
-## Fix round (reuse of an existing coding session)
+## Fix round (same coding session)
 
 ```
-Continue ticket <nn> <title>. The review of <sha> failed. Address these blockers:
+Continue ticket <nn> <title>. Review of <sha> failed. Fix these blockers:
 
-<blocker list, each tied to the acceptance line it hits>
+<blockers, each tied to an acceptance line>
 
-Do not chase anything outside this list; if you judge an item does not belong, say so in
-your close-out instead of silently expanding scope. Re-run the affected subset after fixing.
-Finish with the usual SESSION_DONE.md marker + close-out message to the dispatcher.
+Do only this list. If one item does not fit, say so in your close-out.
+Re-run the affected tests after fixing.
+Finish with the SESSION_DONE.md marker + close-out message to the dispatcher.
 ```

@@ -31,20 +31,20 @@ A session that ends without a close-out did not finish. Treat it as lost. Keep i
 
 ## Steps
 
-1. **Dispatch a ticket**
+1. Dispatch a ticket
    - Take a ready ticket. It has an acceptance checklist and is not blocked.
    - Create one worktree session per ticket. Branch and worktree names follow repo rules (default: `ticket <nn> <title>`).
    - The prompt must include: ticket, acceptance checklist, test scope, runtime policy, model + variant from the repo registry, and the close-out rule. Template: [`references/dispatch-prompts.md`](references/dispatch-prompts.md).
    - After creation: reset the worktree to the baseline, run the repo bootstrap, and check the session with `agent_manager` list.
    - Done when: every session is live, on the baseline, and its prompt has the close-out rule.
 
-2. **Wait for close-outs**
+2. Wait for close-outs
    - Do not poll. A ticket moves forward only when its close-out arrives.
    - Keep a ledger per ticket: stage, tip hash, test counts, verdict.
    - If a session is silent too long: check it once, keep its state, stop it, start a new session on the same branch.
    - Done when: every ticket has a close-out or a successor session.
 
-3. **Check the work**
+3. Check the work
    - A close-out is a claim, not proof. Check on the repo:
      - branch tip hash exists
      - worktree is clean
@@ -53,13 +53,13 @@ A session that ends without a close-out did not finish. Treat it as lost. Keep i
    - If something is missing, send the ticket back with the exact list.
    - Done when: the ticket is ready for review, or returned with gaps.
 
-4. **Gate with a review snapshot**
+4. Gate with a review snapshot
    - Create a snapshot at the branch tip (default: `review <nn>`). Reset it to the tip.
    - Dispatch reviewer session(s). Reviewers judge only against the acceptance checklist.
    - A reviewer writes only its `SESSION_DONE.md`. It follows the same close-out rule.
    - Done when: the review runs at the right tip with the registered reviewer model.
 
-5. **Decide**
+5. Decide
    - PASS: go to merge.
    - FAIL: check each blocker against the acceptance checklist.
      - Blocker matches an acceptance item: send a fix round to the same session.
@@ -68,7 +68,7 @@ A session that ends without a close-out did not finish. Treat it as lost. Keep i
    - If no result after 3 rounds (repo may change this): stop and decide with the user.
    - Done when: each review ends in PASS, a note, or a decision.
 
-6. **Merge and clean up**
+6. Merge and clean up
    - Merge with no-ff into main, from the repo main checkout.
    - The full test suite runs once at this gate.
    - Write the merge record (default: `docs/temp/merge-<date>-ticket-<nn>.md`).
