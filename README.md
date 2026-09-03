@@ -17,7 +17,7 @@ cp -r dispatch-to-worktree ~/.agents/skills/
 or, once the project is hosted on GitHub:
 
 ```bash
-npx skills add <owner>/dispatch-to-worktree -y
+npx skills add Aknirex/dispatch-to-worktree -y
 ```
 
 ## What It Does
