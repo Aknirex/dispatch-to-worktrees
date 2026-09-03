@@ -34,8 +34,8 @@ npx skills add Aknirex/dispatch-to-worktrees -y
 
 - **Session + worktree capability is required.** The host agent must (1) manage git worktrees and (2) spawn and supervise **independent agent sessions** — not just inline subagents. The whole protocol (dispatch, close-out, stop, re-dispatch) only makes sense for sessions with their own context and lifecycle.
 - **Developed primarily for kilocode Agent Manager.** The skill assumes an `agent_manager`-style session tool and a resident AM dispatcher session. If the runtime lacks that capability, the skill stops and tells the user to run it inside Agent Manager.
-- **Default ticket source: matt-pocock/skills output.** By default it recognizes tickets split by the [matt-pocock/skills](https://github.com/mattpocock/skills) workflow (`to-tickets`/`triage`): markdown tickets under `.scratch/<feature>/issues/` with a `Status: ready-for-agent` triage line and an acceptance checklist. The repo's own `AGENTS.md` overrides this default.
-- **A process skill, not an implementer.** It does not split tickets (do that first with `to-tickets`/`triage`) and it does not rewrite a repo's conventions — ticket source, model registry, and test commands all come from the target repo's `AGENTS.md`.
+- **No fixed default ticket source.** The agent finds ready tickets from whatever the repo actually uses — local ticket files, a remote tracker through its CLI (GitHub issues via `gh`, Jira CLI/API), or the user's request in context. When the source is not configured and unclear, it asks the user instead of guessing. Repo `AGENTS.md` conventions always win.
+- **A process skill, not an implementer.** It does not split tickets itself and it does not rewrite a repo's conventions — ticket source, model registry, and test commands all come from the target repo's `AGENTS.md`.
 - **Not for a single isolated task.** It exists to run concurrent ticket pipelines; a lone coding task does not need it.
 
 ## Good Input To Give The Agent

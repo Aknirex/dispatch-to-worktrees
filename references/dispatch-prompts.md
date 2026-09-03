@@ -2,6 +2,8 @@
 
 Templates for spawning sessions with `agent_manager`. Fill in every `<angle-bracket>` field from the repo rules. Send the prompt whole, not summarized.
 
+Fill `<ses_dispatcher_id>` with your own session id from `agent_manager` list. Do not hardcode it.
+
 ## Worker session
 
 ```
